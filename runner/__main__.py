@@ -74,7 +74,7 @@ class Runner(runner_pb2_grpc.RunnerServicer):
     
     def _get_server_status(self):
         res = requests.get(self._server_monitor_url)
-        print(res)
+        print(res.json())
         return "available"
     
 def serve():
