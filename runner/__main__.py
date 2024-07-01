@@ -62,7 +62,6 @@ class Runner(runner_pb2_grpc.RunnerServicer):
         return super().remove_task(request, context)
     
     def create_task_environment(self, request, context):
-        print("Creating task environment", request)
         asyncio.run(cg.setup(request.job_id, request.dataset_name, request.model_name, request.dataset_branch, request.model_branch))
         return runner_pb2.CreateTaskResponse(status="success")
     
@@ -73,8 +72,9 @@ class Runner(runner_pb2_grpc.RunnerServicer):
         return super().run_task(request, context)
     
     def _get_server_status(self):
-        res = requests.get(self._server_monitor_url)
-        print(res.json())
+        # res = requests.get(self._server_monitor_url)
+        # print(res.json())
+        # TODO: Function to calculate availability
         return "available"
     
 def serve():
