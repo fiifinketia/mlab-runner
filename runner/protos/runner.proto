@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+package runner;
+
+service Runner {
+    rpc get_runner (GetRunnerRequest) returns (GetRunnerResponse);
+    rpc stop_task (StopTaskRequest) returns (StopTaskResponse);
+    rpc remove_task (RemoveTaskRequest) returns (RemoveTaskResponse);
+    rpc create_task_environment (CreateTaskRequest) returns (stream CreateTaskResponse);
+    rpc get_task_environment (GetTaskEnvironmentRequest) returns (GetTaskEnvironmentResponse);
+    rpc run_task (RunTaskRequest) returns (stream RunTaskResponse);
+    rpc submit_result (SubmitResultRequest) returns (SubmitResultResponse);
+}
+
+message GetRunnerRequest {
+}
+
+message GetRunnerResponse {
+    string status = 1;
+}
+
+message StopTaskRequest {}
+
+message StopTaskResponse {}
+
+message RemoveTaskRequest {}
+
+message RemoveTaskResponse {}
+
+message CreateTaskRequest {
+    string job_id = 1;
+    string dataset_name = 2;
+    string model_name = 3;
+    optional string model_branch = 4;
+    optional string dataset_branch = 5;
+}
+
+message CreateTaskResponse {}
+
+message GetTaskEnvironmentRequest {}
+
+message GetTaskEnvironmentResponse {}
+
+message RunTaskRequest {}
+
+message RunTaskResponse {
+    // stream logging files or if the task is completed return results
+    // oneof response {
+    //     BytesContent log = 1;
+    //     TaskResult result = 2;
+    // }
+}
+
+message BytesContent {
+    int64 file_size = 1;
+    bytes buffer = 2;
+    int32 readed_byte = 3;
+    FileInfo info = 4;
+}
+
+message TaskResult {
+    string result_id = 1;
+    string status = 2;
+    repeated BytesContent files = 3;
+    repeated Metrics metrics = 4;
+    string pkg_name = 5;
+    optional string pretrained_model = 6;
+}
+
+message FileInfo{
+    string fileName = 1;
+    string fileExtension = 2;
+}
+
+message Metrics {
+    string name = 1;
+    string value = 2;
+}
+
+message SubmitResultRequest {}
+
+message SubmitResultResponse {}

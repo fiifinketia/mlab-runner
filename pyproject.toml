@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "runner"
+version = "0.1.0"
+description = ""
+authors = ["disal <disal@admin.git>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+python-gitlab = "^4.7.0"
+gitpython = "^3.1.43"
+grpcio-tools = "^1.64.1"
+pydantic = { version = "^1", extras=["dotenv"] }
+yarl = "^1.9.4"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
