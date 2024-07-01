@@ -10,6 +10,9 @@ import runner.cog as cg
 import inspect
 import time
 import multiprocessing
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 def add_timeout(function, limit=60):
     assert inspect.isfunction(function)
