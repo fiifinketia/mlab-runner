@@ -80,7 +80,7 @@ class Runner(runner_pb2_grpc.RunnerServicer):
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=settings.workers_count))
     runner_pb2_grpc.add_RunnerServicer_to_server(Runner(), server)
-    server.add_insecure_port('localhost:50051')
+    server.add_insecure_port('0.0.0.0:50051')
     server.start()
     print('Runner server started on port 50051')
     server.wait_for_termination()
