@@ -50,7 +50,7 @@ async def run(
     dataset_dir: str,
     base_dir: str,
     result_id: uuid.UUID,
-    api_url: str,
+    rpc_url: str,
     user_token: str,
     job_id: uuid.UUID,
     trained_model: str | None = None,
@@ -67,7 +67,7 @@ async def run(
     - dataset_dir (str): The directory path of the dataset.
     - base_dir (str): The base directory path.
     - result_id (uuid.UUID): The unique identifier for the result.
-    - api_url (str): The URL of the API.
+    - rpc_url (str): The URL of the API.
     - user_token (str): The user's authentication token.
     - job_id (uuid.UUID): The unique identifier for the job.
     - trained_model (str | None, optional): The path to the trained model. Defaults to None.
@@ -85,7 +85,7 @@ async def run(
         dataset_dir=dataset_dir,
         base_dir=base_dir,
         result_id=result_id,
-        api_url=api_url,
+        rpc_url=rpc_url,
         user_token=user_token,
         trained_model=trained_model,
         job_id=job_id
@@ -104,7 +104,7 @@ def build_cli_script(
     dataset_dir: str,
     base_dir: str,
     result_id: uuid.UUID,
-    api_url: str,
+    rpc_url: str,
     user_token: str,
     job_id: uuid.UUID,
     trained_model: str | None = None,
@@ -122,7 +122,7 @@ def build_cli_script(
     - dataset_dir (str): The directory path of the dataset.
     - base_dir (str): The base directory path.
     - result_id (uuid.UUID): The unique identifier for the result.
-    - api_url (str): The URL of the API.
+    - rpc_url (str): The URL of the API.
     - user_token (str): The user's authentication token.
     - job_id (uuid.UUID): The unique identifier for the job.
     - trained_model (str | None, optional): The path to the trained model. Defaults to None.
@@ -131,7 +131,7 @@ def build_cli_script(
     str: The constructed CLI script as a string.
     """
     dataset_dir = replace_source_with_destination(dataset_dir, base_dir)
-    run_script = f"cog train -n {str(job_id)} -i dataset={dataset_dir} -i result_id={result_id} -i api_url={api_url} -i pkg_name={name} -i user_token={user_token}"
+    run_script = f"cog train -n {str(job_id)} -i dataset={dataset_dir} -i result_id={result_id} -i rpc_url={rpc_url} -i pkg_name={name} -i user_token={user_token}"
     if trained_model is not None:
         trained_model = replace_source_with_destination(trained_model, base_dir)
         run_script += f" -i trained_model={trained_model}"

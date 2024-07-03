@@ -3,7 +3,7 @@ from concurrent import futures
 import sys
 import grpc
 import requests
-from runner import runner_pb2_grpc, runner_pb2 
+from mlab_pyprotos import runner_pb2_grpc, runner_pb2 
 from runner.settings import settings
 import runner.cog as cg
 
@@ -65,14 +65,17 @@ class Runner(runner_pb2_grpc.RunnerServicer):
         return super().remove_task(request, context)
     
     def create_task_environment(self, request, context):
-        asyncio.run(cg.setup(request.job_id, request.dataset_name, request.model_name, request.dataset_branch, request.model_branch))
+        asyncio.run(cg.setup(request.job_id, request.dataset.name, request.model.name, request.dataset.branch, request.model.branch))
         return runner_pb2.CreateTaskResponse(status="success")
     
     def get_task_environment(self, request, context):
         return super().get_task_environment(request, context)
     
     def run_task(self, request, context):
-        return super().run_task(request, context)
+        runner_pb2.M
+        asyncio.run(cg.prepare(job_id=request.job_id, dataset_name=request.dataset.name, model_name=request.model.name, dataset_type=request.dataset.type, dataset_branch=request.dataset.branch, model_branch=request.model.branch, results_dir=request.results_dir))
+        asyncio.run(cg.run(name=request.task_name, at=request.model.path, task_id=request.task_id, user_id=request.user_id, base_dir=request.base_dir, dataset_dir=request.dataset.path, job_id=request.job_id, trained_model=request.trained_model, rpc_url=request.rpc_url))
+        return runner_pb2.RunTaskResponse()
     
     def _get_server_status(self):
         # res = requests.get(self._server_monitor_url)
@@ -81,15 +84,13 @@ class Runner(runner_pb2_grpc.RunnerServicer):
         return "available"
     
 def serve():
+    logger = logging.getLogger(__name__)
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=settings.workers_count))
     runner_pb2_grpc.add_RunnerServicer_to_server(Runner(), server)
     server.add_insecure_port('0.0.0.0:50051')
     server.start()
-    print('Runner server started on port 50051')
+    logger.info('Runner server started on port 50051')
     server.wait_for_termination()
-
-    # while not is_out:
-    #     print('Runner server stopped')
 
 if __name__ == '__main__':
     serve()
