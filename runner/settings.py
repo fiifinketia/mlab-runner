@@ -10,7 +10,7 @@ from pydantic import BaseSettings
 from yarl import URL
 
 TEMP_DIR = Path(gettempdir())
-load_dotenv()
+load_dotenv(override=True)
 
 class LogLevel(str, enum.Enum):  # noqa: WPS600
     """Possible log levels."""
