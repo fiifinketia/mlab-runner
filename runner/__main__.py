@@ -72,7 +72,6 @@ class Runner(runner_pb2_grpc.RunnerServicer):
         return super().get_task_environment(request, context)
     
     def run_task(self, request, context):
-        runner_pb2.M
         asyncio.run(cg.prepare(job_id=request.job_id, dataset_name=request.dataset.name, model_name=request.model.name, dataset_type=request.dataset.type, dataset_branch=request.dataset.branch, model_branch=request.model.branch, results_dir=request.results_dir))
         asyncio.run(cg.run(name=request.task_name, at=request.model.path, task_id=request.task_id, user_id=request.user_id, base_dir=request.base_dir, dataset_dir=request.dataset.path, job_id=request.job_id, trained_model=request.trained_model, rpc_url=request.rpc_url))
         return runner_pb2.RunTaskResponse()
