@@ -16,26 +16,3 @@ yarl = "^1.9.4"
 [tool.pdm.scripts]
 start = "python -m runner"
 
-[tool.pdm.build]
-includes = []
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
-[project]
-authors = [
-    {name = "disal", email = "disal@admin.git"},
-]
-requires-python = "<4.0,>=3.12"
-dependencies = [
-    "python-gitlab<5.0.0,>=4.7.0",
-    "gitpython<4.0.0,>=3.1.43",
-    "grpcio-tools<2.0.0,>=1.64.1",
-    "pydantic[dotenv]<2,>=1",
-    "yarl<2.0.0,>=1.9.4",
-    "mlab-pyprotos @ git+ssh://git@github.com/Data-Intel-and-Swarm-Analytics-Lab/mlab-pyprotos.git@master",
-]
-name = "runner"
-version = "0.1.0"
-description = ""
-readme = "README.md"
