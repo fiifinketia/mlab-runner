@@ -104,15 +104,13 @@ class Runner(runner_pb2_grpc.RunnerServicer):
             time.sleep(0.1)
         Runner.logger().info("Task completed successfully")
         results = cg.fetch_results(request.model.path)
-        print(results)
         if results is None:
             Runner.logger().error("No results")
         elif results[0] == "success":
-            print(results)
             status, success = results
             Runner.logger().info("Results fetched successfully")
             files = []
-            for key, value in success.get("files"):
+            for key, value in success.get("files").items():
                 info = runner_pb2.FileInfo(
                     name=key,
                     extention=key.split(".")[-1]
@@ -124,7 +122,7 @@ class Runner(runner_pb2_grpc.RunnerServicer):
                 )
                 files.append(bytes_content)
             metrics = []
-            for key, value in success.get("metrics"):
+            for key, value in success.get("metrics").items():
                 metrics.append(runner_pb2.Metric(
                     name=key,
                     value=value,
@@ -137,13 +135,13 @@ class Runner(runner_pb2_grpc.RunnerServicer):
                 pkg_name=success.get('pkg_name'),
                 pretrained_model=success.get('pretrained_model'),
             )
-            print(task_result)
+            print(metrics)
             yield runner_pb2.RunTaskResponse(result=task_result)
         else:
             Runner.logger().error("Error in return")
             status, error = results
             files = []
-            for key, value in error.get("files"):
+            for key, value in error.get("files").items():
                 info = runner_pb2.FileInfo(
                     name=key,
                     extention=key.split(".")[-1]
