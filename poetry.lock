@@ -284,7 +284,7 @@ develop = false
 type = "git"
 url = "https://github.com/Data-Intel-and-Swarm-Analytics-Lab/mlab-pyprotos.git"
 reference = "master"
-resolved_reference = "bb858e1da09f6a1309b1973d0a5316d8499ccace"
+resolved_reference = "fec9aa055fd69769df315b636999d0e3b50e2576"
 
 [[package]]
 name = "multidict"
