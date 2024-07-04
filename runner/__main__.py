@@ -115,7 +115,11 @@ def serve():
     runner_pb2_grpc.add_RunnerServicer_to_server(Runner(), server)
     server.add_insecure_port('0.0.0.0:50051')
     server.start()
-    logger.info('Runner server started on port 50051')
+    try:
+        logger.info('Runner server started on port 50051')
+        time.sleep(86400)
+    except InterruptedError:
+        pass
     server.wait_for_termination()
 
 if __name__ == '__main__':
