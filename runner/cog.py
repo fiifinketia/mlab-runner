@@ -118,8 +118,8 @@ def build_cli_script(
         trained_model = replace_source_with_destination(trained_model, base_dir)
         run_script += f" -i trained_model={trained_model}"
     # Mount the base directory
-    local_dir = change_to_local_dir(base_dir)
-    run_script += f" --mount type=bind,source={base_dir},target={settings.cog_base_dir}"
+    local_dir = change2_local_dir(base_dir)
+    run_script += f" --mount type=bind,source={local_dir},target={settings.cog_base_dir}"
     return run_script
 
 def stream_process(process):
