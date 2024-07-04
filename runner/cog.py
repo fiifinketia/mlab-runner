@@ -130,6 +130,7 @@ def fetch_results(at: str) -> Any:
     error = None
     success = None
     at = change2_local_dir(at)
+    print(at)
     try:
         with open(f"{at}/success/results.json", "r") as f:
             success = json.load(f)
@@ -139,8 +140,8 @@ def fetch_results(at: str) -> Any:
             with open(f"{at}/error/results.json", "r") as f:
                 error = json.load(f)
             return error
-        except FileNotFoundError:
-            logging.error("Error loading results: {}".format(error))
+        except FileNotFoundError as e:
+            logging.error("Error loading results: {}".format(e))
             return None
     except Exception as e:
         logging.error(f"Error fetching results: {str(e)}")
