@@ -134,7 +134,7 @@ class Runner(runner_pb2_grpc.RunnerServicer):
                 pkg_name=success.get('pkg_name'),
                 pretrained_model=success.get('pretrained_model'),
             )
-            return runner_pb2.RunTaskResponse(result=task_result)
+            yield runner_pb2.RunTaskResponse(result=task_result)
         else:
             Runner.logger().error("Error in return")
             status, error = results
@@ -157,7 +157,7 @@ class Runner(runner_pb2_grpc.RunnerServicer):
                 metrics=[],
                 pkg_name=error.get('pkg_name'),
             )
-            return runner_pb2.RunTaskResponse(result=task_result)
+            yield runner_pb2.RunTaskResponse(result=task_result)
 
         Runner.increment_worker_count()
         
