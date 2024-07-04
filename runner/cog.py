@@ -51,7 +51,7 @@ def run(
     at: str,
     dataset_dir: str,
     base_dir: str,
-    result_id: uuid.UUID,
+    task_id: str,
     rpc_url: str,
     user_token: str,
     job_id: uuid.UUID,
@@ -64,13 +64,13 @@ def run(
         name=name,
         dataset_dir=dataset_dir,
         base_dir=base_dir,
-        result_id=result_id,
+        task_id=task_id,
         rpc_url=rpc_url,
         user_token=user_token,
         trained_model=trained_model,
         job_id=job_id
     )
-    # stdout_file_path = Path(f"{base_dir}/{str(result_id)}/stdout.log").resolve()
+    # stdout_file_path = Path(f"{base_dir}/{str(task_id)}/stdout.log").resolve()
     # process = executor.submit(
     #     run_process_with_std,
     #     run_script=run_script,
@@ -85,7 +85,7 @@ def build_cli_script(
     name: str,
     dataset_dir: str,
     base_dir: str,
-    result_id: uuid.UUID,
+    task_id: str,
     rpc_url: str,
     user_token: str,
     job_id: uuid.UUID,
@@ -103,7 +103,7 @@ def build_cli_script(
     - name (str): The name of the cog.
     - dataset_dir (str): The directory path of the dataset.
     - base_dir (str): The base directory path.
-    - result_id (uuid.UUID): The unique identifier for the result.
+    - task_id (str): The unique identifier for the task.
     - rpc_url (str): The URL of the API.
     - user_token (str): The user's authentication token.
     - job_id (uuid.UUID): The unique identifier for the job.
@@ -113,7 +113,7 @@ def build_cli_script(
     str: The constructed CLI script as a string.
     """
     dataset_dir = replace_source_with_destination(dataset_dir, base_dir)
-    run_script = f"cog train -n {str(job_id)} -i dataset={dataset_dir} -i result_id={result_id} -i rpc_url={rpc_url} -i pkg_name={name} -i user_token={user_token}"
+    run_script = f"cog train -n {str(job_id)} -i dataset={dataset_dir} -i task_id={task_id} -i rpc_url={rpc_url} -i pkg_name={name} -i user_token={user_token}"
     if trained_model is not None:
         trained_model = replace_source_with_destination(trained_model, base_dir)
         run_script += f" -i trained_model={trained_model}"
