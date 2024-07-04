@@ -103,7 +103,7 @@ class Runner(runner_pb2_grpc.RunnerServicer):
             Runner.logger().error("No results")
         else:
             Runner.logger().info("Results fetched successfully")
-            print(results)
+            print(results.get("task_id"))
             # yield runner_pb2.RunTaskResponse(results=results)
         Runner.increment_worker_count()
         

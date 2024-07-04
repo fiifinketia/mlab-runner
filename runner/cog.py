@@ -122,13 +122,6 @@ def build_cli_script(
     run_script += f" --mount type=bind,source={local_dir},target={settings.cog_base_dir}"
     return run_script
 
-def stream_process(process):
-    go = process.poll() is None
-    for line in process.stdout:
-        print(line)
-    return go
-
-
 def run_process_with_std(run_script: str, at: str) -> subprocess.Popen[bytes]:
     process = subprocess.Popen(run_script, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=at, executable="/bin/bash")
     return process
