@@ -1,4 +1,5 @@
 import asyncio
+import base64
 from concurrent import futures
 from pathlib import Path
 import pickle
@@ -117,7 +118,7 @@ class Runner(runner_pb2_grpc.RunnerServicer):
                 )
                 bytes_content = runner_pb2.BytesContent(
                     file_size=len(value),
-                    buffer=value,
+                    buffer=base64.b64decode(value),
                     info=info,
                 )
                 files.append(bytes_content)
