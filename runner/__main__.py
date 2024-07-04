@@ -14,7 +14,7 @@ import time
 import multiprocessing
 import logging
 
-logging.basicConfig(level=logging.CRITICAL)
+logging.basicConfig(level=logging.DEBUG)
 class RunnerException(Exception):
 
     def __init__(self, message: str) -> None:
