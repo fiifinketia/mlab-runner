@@ -14,44 +14,6 @@ import time
 import multiprocessing
 import logging
 
-logging.basicConfig(level=logging.INFO)
-
-def add_timeout(function, limit=60):
-    assert inspect.isfunction(function)
-    if limit <= 0:
-        raise ValueError()
-    return _Timeout(function, limit)
-
-class _Timeout:
-    def __init__(self, function, limit):
-        self.__limit = limit
-        self.__function = function
-        self.__timeout = time.clock()
-        self.__process = multiprocessing.Process()
-        self.__queue = multiprocessing.Queue()
-
-    def __call__(self, *args, **kwargs):
-        self.__process = multiprocessing.Process(
-            target=_target,
-            args=(self.__queue, self.__function) + args,
-            kwargs=kwargs
-        )
-        self.__process.start()
-        self.__process.join(self.__limit)
-        if self.__process.is_alive():
-            self.__process.terminate()
-            raise TimeoutError("Function execution timed out")
-        success, result = self.__queue.get()
-        if success:
-            return result
-        else:
-            raise result
-
-def _target(queue, function, *args, **kwargs):
-    try:
-        queue.put((True, function(*args, **kwargs)))
-    except:
-        queue.put((False, sys.exc_info()[1]))
 
 class RunnerException(Exception):
 
@@ -139,8 +101,8 @@ class Runner(runner_pb2_grpc.RunnerServicer):
         # res = requests.get(self._server_monitor_url)
         # print(res.json())
         # TODO: Function to calculate availability
-        workers_count = self._load_worker_count()
-        self._logger.info(f"Current worker count: {workers_count} workers")
+        workers_count = self.load_worker_count()
+        Runner.logger.info(f"Current worker count: {workers_count} workers")
         return "available" if workers_count > 0 else "occupied"
     
     def _stream_process(process):
