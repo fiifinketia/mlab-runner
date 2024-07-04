@@ -70,7 +70,7 @@ def run(
         trained_model=trained_model,
         job_id=job_id
     )
-    at = change2_local_dir(base_dir)
+    at = change2_local_dir(at)
     print(run_script)
     # stdout_file_path = Path(f"{base_dir}/{str(task_id)}/stdout.log").resolve()
     # process = executor.submit(
@@ -136,6 +136,7 @@ def run_process_with_std(run_script: str, at: str) -> subprocess.Popen[bytes]:
 def fetch_results(at: str) -> Dict[Any, Any]:
     error = None
     success = None
+    at = change2_local_dir(at)
     
     with open(f"{at}/error/results.json", "r") as f:
         error = json.load(f)
