@@ -134,6 +134,7 @@ class Runner(runner_pb2_grpc.RunnerServicer):
                 pkg_name=success.get('pkg_name'),
                 pretrained_model=success.get('pretrained_model'),
             )
+            print(task_result)
             yield runner_pb2.RunTaskResponse(result=task_result)
         else:
             Runner.logger().error("Error in return")
