@@ -117,11 +117,13 @@ async def serve():
     runner_pb2_grpc.add_RunnerServicer_to_server(Runner(), server)
     server.add_insecure_port('0.0.0.0:50051')
     logger.info('Runner server started on port 50051')
-    await server.start()
-    await server.wait_for_termination()
-
-if __name__ == '__main__':
     try:
-        asyncio.run(serve())
+        await server.start()
+        await server.wait_for_termination()
     except InterruptedError:
         pass
+    finally:
+        await server.stop(0)
+
+if __name__ == '__main__':
+    asyncio.run(serve())
