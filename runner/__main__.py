@@ -83,6 +83,7 @@ class Runner(runner_pb2_grpc.RunnerServicer):
         return super().remove_task(request, context)
     
     def create_task_environment(self, request, context):
+        print(request)
         self.check_worker_count()
         asyncio.run(cg.setup(request.job_id, request.dataset.name, request.model.name, request.dataset.branch, request.model.branch))
         return runner_pb2.CreateTaskResponse()
