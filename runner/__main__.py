@@ -28,8 +28,9 @@ class Runner(runner_pb2_grpc.RunnerServicer):
     def __init__(self, workers_count: int=5) -> None:
         super().__init__()
         self.save_worker_count(workers_count)
+        self.logger = logging.getLogger(__name__)
 
-    @property
+    @staticmethod
     def logger():
         _logger = logging.getLogger(__name__)
         _logger.info('Starting')
@@ -53,7 +54,7 @@ class Runner(runner_pb2_grpc.RunnerServicer):
         workers_count = Runner.load_worker_count()
         workers_count = workers_count -1
         Runner.save_worker_count(workers_count)
-        Runner.logger.debug(f"Worker count decrease: {workers_count}")
+        Runner.logger().debug(f"Worker count decrease: {workers_count}")
         return workers_count
     
     @staticmethod
@@ -61,14 +62,14 @@ class Runner(runner_pb2_grpc.RunnerServicer):
         workers_count = Runner.load_worker_count()
         workers_count = workers_count +1
         Runner.save_worker_count(workers_count)
-        Runner.logger.debug(f"Worker count increase: {workers_count}")
+        Runner.logger().debug(f"Worker count increase: {workers_count}")
         return workers_count
     
     @staticmethod
     def check_worker_count() -> bool:
         worker_count = Runner.load_worker_count()
         if worker_count < 0:
-            Runner.logger.error("Not enough workers to create a task environment")
+            Runner.logger().error("Not enough workers to create a task environment")
             raise RunnerException("Not enough workers to create a task environment")
         return True
     def get_runner(self, request, context):
@@ -104,7 +105,7 @@ class Runner(runner_pb2_grpc.RunnerServicer):
         # print(res.json())
         # TODO: Function to calculate availability
         workers_count = self.load_worker_count()
-        Runner.logger.debug(f"Current worker count: {workers_count} workers")
+        Runner.logger().debug(f"Current worker count: {workers_count} workers")
         return "available" if workers_count > 0 else "occupied"
     
     def _stream_process(process):
