@@ -1,8 +1,10 @@
 """This module contains the functions to run the cog commands"""
 from concurrent.futures import ProcessPoolExecutor
+import json
 import logging
 import subprocess
 import os, shutil
+from typing import Any, Dict
 import uuid
 from pathlib import Path
 
@@ -52,8 +54,7 @@ def run(
     dataset_dir: str,
     base_dir: str,
     task_id: str,
-    rpc_url: str,
-    user_token: str,
+    user_id: str,
     job_id: uuid.UUID,
     trained_model: str | None = None,
 ) -> subprocess.Popen[bytes]:
@@ -65,8 +66,7 @@ def run(
         dataset_dir=dataset_dir,
         base_dir=base_dir,
         task_id=task_id,
-        rpc_url=rpc_url,
-        user_token=user_token,
+        user_id=user_id,
         trained_model=trained_model,
         job_id=job_id
     )
@@ -86,8 +86,7 @@ def build_cli_script(
     dataset_dir: str,
     base_dir: str,
     task_id: str,
-    rpc_url: str,
-    user_token: str,
+    user_id: str,
     job_id: uuid.UUID,
     trained_model: str | None = None,
 ) -> str:
@@ -104,8 +103,7 @@ def build_cli_script(
     - dataset_dir (str): The directory path of the dataset.
     - base_dir (str): The base directory path.
     - task_id (str): The unique identifier for the task.
-    - rpc_url (str): The URL of the API.
-    - user_token (str): The user's authentication token.
+    - user_id (str): The user's authentication token.
     - job_id (uuid.UUID): The unique identifier for the job.
     - trained_model (str | None, optional): The path to the trained model. Defaults to None.
 
@@ -113,7 +111,7 @@ def build_cli_script(
     str: The constructed CLI script as a string.
     """
     dataset_dir = replace_source_with_destination(dataset_dir, base_dir)
-    run_script = f"cog train -n {str(job_id)} -i dataset={dataset_dir} -i task_id={task_id} -i rpc_url={rpc_url} -i pkg_name={name} -i user_token={user_token}"
+    run_script = f"cog train -n {str(job_id)} -i dataset={dataset_dir} -i task_id={task_id} -i pkg_name={name} -i user_id={user_id}"
     if trained_model is not None:
         trained_model = replace_source_with_destination(trained_model, base_dir)
         run_script += f" -i trained_model={trained_model}"
@@ -132,7 +130,17 @@ def run_process_with_std(run_script: str, at: str) -> subprocess.Popen[bytes]:
     process = subprocess.Popen(run_script, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=at, executable="/bin/bash")
     return process
 
-   
+def fetch_results(at: str) -> Dict[Any, Any]:
+    error = None
+    success = None
+    
+    with open(f"{at}/error/results.json", "r") as f:
+        error = json.load(f)
+
+    with open(f"{at}/success/results.json", "r") as f:
+        success = json.load(f)
+
+    return {"error": error, "success": success}
 
 async def setup(
         job_id: uuid.UUID,
