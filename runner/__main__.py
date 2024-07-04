@@ -106,6 +106,7 @@ class Runner(runner_pb2_grpc.RunnerServicer):
         if results is None:
             Runner.logger().error("No results")
         elif results[0] == "success":
+            print(results)
             status, success = results
             Runner.logger().info("Results fetched successfully")
             files = []
