@@ -65,8 +65,7 @@ class Runner(runner_pb2_grpc.RunnerServicer):
 
     def __init__(self, workers_count: int=5) -> None:
         super().__init__()
-        self._save_worker_count(workers_count)
-        self._logger = logging.getLogger(__name__)
+        self.save_worker_count(workers_count)
 
     @property
     def logger():
