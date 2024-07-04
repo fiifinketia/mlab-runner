@@ -133,18 +133,21 @@ def run_process_with_std(run_script: str, at: str) -> subprocess.Popen[bytes]:
     process = subprocess.Popen(run_script, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=at, executable="/bin/bash")
     return process
 
-def fetch_results(at: str) -> Dict[Any, Any]:
+def fetch_results(at: str) -> Any:
     error = None
     success = None
     at = change2_local_dir(at)
-    
-    with open(f"{at}/error/results.json", "r") as f:
-        error = json.load(f)
-
-    with open(f"{at}/success/results.json", "r") as f:
-        success = json.load(f)
-
-    return {"error": error, "success": success}
+    try:
+        with open(f"{at}/success/results.json", "r") as f:
+            success = json.load(f)
+        return success
+    except FileNotFoundError:
+        try:
+            with open(f"{at}/error/results.json", "r") as f:
+                error = json.load(f)
+            return error
+        except FileNotFoundError:
+            return None
 
 async def setup(
         job_id: uuid.UUID,

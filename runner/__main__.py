@@ -28,7 +28,6 @@ class Runner(runner_pb2_grpc.RunnerServicer):
     def __init__(self, workers_count: int=5) -> None:
         super().__init__()
         self.save_worker_count(workers_count)
-        self.logger = logging.getLogger(__name__)
 
     @staticmethod
     def logger():
@@ -99,7 +98,13 @@ class Runner(runner_pb2_grpc.RunnerServicer):
             for line in process.stdout:
                 yield runner_pb2.RunTaskResponse(line=line)
             time.sleep(0.1)
-        print(cg.fetch_results(request.model.path))
+        results = cg.fetch_results(request.model.path)
+        if results is None:
+            Runner.logger().error("No results")
+        else:
+            Runner.logger().info("Results fetched successfully")
+            print(results)
+            # yield runner_pb2.RunTaskResponse(results=results)
         Runner.increment_worker_count()
         
     
