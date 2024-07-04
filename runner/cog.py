@@ -146,7 +146,7 @@ def fetch_results(at: str) -> Dict[Any, Any]:
     return {"error": error, "success": success}
 
 async def setup(
-        job_id: str,
+        job_id: uuid.UUID,
         dataset_name: str,
         model_name: str,
         dataset_branch: str | None = None,
