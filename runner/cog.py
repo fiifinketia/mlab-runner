@@ -132,20 +132,20 @@ def fetch_results(at: str) -> Any:
     at = change2_local_dir(at)
     print(at)
     try:
-        with open(f"{at}/success/results.json", "r") as f:
+        with open(f"{at}/success/result.json", "r") as f:
             success = json.load(f)
         return success
     except FileNotFoundError as e:
-        logging.error("Error loading results: {}".format(e))
+        logging.error("Error loading result: {}".format(e))
         try:
-            with open(f"{at}/error/results.json", "r") as f:
+            with open(f"{at}/error/result.json", "r") as f:
                 error = json.load(f)
             return error
         except FileNotFoundError as e:
-            logging.error("Error loading results: {}".format(e))
+            logging.error("Error loading result: {}".format(e))
             return None
     except Exception as e:
-        logging.error(f"Error fetching results: {str(e)}")
+        logging.error(f"Error fetching result: {str(e)}")
         return None
 
 async def setup(
