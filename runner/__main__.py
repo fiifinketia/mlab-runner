@@ -14,7 +14,7 @@ import time
 import multiprocessing
 import logging
 
-
+logging.basicConfig(level=logging.CRITICAL)
 class RunnerException(Exception):
 
     def __init__(self, message: str) -> None:
@@ -110,12 +110,12 @@ class Runner(runner_pb2_grpc.RunnerServicer):
         return go
     
 async def serve():
-    # logger = logging.getLogger(__name__)
+    logger = logging.getLogger(__name__)
     server: grpc.aio.Server = grpc.aio.server(maximum_concurrent_rpcs=settings.workers_count)
     runner_pb2_grpc.add_RunnerServicer_to_server(Runner(), server)
     server.add_insecure_port('0.0.0.0:50051')
     await server.start()
-    print('Runner server started on port 50051')
+    logger.info('Runner server started on port 50051')
     await server.wait_for_termination()
 
 if __name__ == '__main__':
