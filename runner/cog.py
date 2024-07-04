@@ -140,7 +140,11 @@ def fetch_results(at: str) -> Any:
                 error = json.load(f)
             return error
         except FileNotFoundError:
+            logging.error("Error loading results: {}".format(error))
             return None
+    except Exception as e:
+        logging.error(f"Error fetching results: {str(e)}")
+        return None
 
 async def setup(
         job_id: uuid.UUID,
