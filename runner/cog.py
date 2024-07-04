@@ -1,10 +1,12 @@
 """This module contains the functions to run the cog commands"""
 from concurrent.futures import ProcessPoolExecutor
+import logging
 import subprocess
 import os, shutil
 import uuid
 from pathlib import Path
 
+from runner.__main__ import Runner
 from runner.git import GitService
 from runner.settings import settings
 
@@ -44,7 +46,7 @@ def copyfile(
     except Exception as e:
         raise Exception(f"Error copying file: {str(e)}")
 
-async def run(
+def run(
     name: str,
     at: str,
     dataset_dir: str,
@@ -54,31 +56,9 @@ async def run(
     user_token: str,
     job_id: uuid.UUID,
     trained_model: str | None = None,
-) -> Path:
-    """
-    Run a script in a cog environment using ProcessPoolExecutor.
-
-    This function is responsible for executing a command-line interface (CLI) script in a cog environment.
-    It uses Python's concurrent.futures.ProcessPoolExecutor to run the script asynchronously.
-
-    Parameters:
-    - name (str): The name of the cog.
-    - at (str): The directory path where the script should be executed.
-    - dataset_dir (str): The directory path of the dataset.
-    - base_dir (str): The base directory path.
-    - result_id (uuid.UUID): The unique identifier for the result.
-    - rpc_url (str): The URL of the API.
-    - user_token (str): The user's authentication token.
-    - job_id (uuid.UUID): The unique identifier for the job.
-    - trained_model (str | None, optional): The path to the trained model. Defaults to None.
-
-    Returns:
-    Path
-
-    Raises:
-    - Any: Any exceptions raised during the execution of the script.
-    """
-    executor = ProcessPoolExecutor()
+) -> subprocess.Popen[bytes]:
+    # logger = logging.getLogger(__name__)
+    # executor = ProcessPoolExecutor()
 
     run_script = build_cli_script(
         name=name,
@@ -90,14 +70,16 @@ async def run(
         trained_model=trained_model,
         job_id=job_id
     )
-    stdout_file_path = Path(f"{base_dir}/{str(result_id)}/stdout.log").resolve()
-    executor.submit(
-        run_process_with_std,
-        run_script=run_script,
-        stdout_file_path=stdout_file_path,
-        at=at
-    )
-    return stdout_file_path
+    # stdout_file_path = Path(f"{base_dir}/{str(result_id)}/stdout.log").resolve()
+    # process = executor.submit(
+    #     run_process_with_std,
+    #     run_script=run_script,
+    #     stdout_file_path=stdout_file_path,
+    #     at=at
+    # )
+    # process.add_done_callback(Runner.increment_worker_count)
+    # process.
+    return run_process_with_std(run_script=run_script, at=at)
 
 def build_cli_script(
     name: str,
@@ -139,35 +121,18 @@ def build_cli_script(
     run_script += f" --mount type=bind,source={base_dir},target={settings.cog_base_dir}"
     return run_script
 
-def run_process_with_std(run_script: str, stdout_file_path: Path, at: str) -> None:
-    """
-    Run a process with stderr and stdout.
+def stream_process(process):
+    go = process.poll() is None
+    for line in process.stdout:
+        print(line)
+    return go
 
-    This function executes a command-line script in a subprocess, redirecting the standard output (stdout)
-    and standard error (stderr) to a specified file. The function also changes the working directory (cwd)
-    to the specified path before executing the script.
 
-    Parameters:
-    - run_script (str): The command-line script to be executed.
-    - stdout_file_path (Path): The path to the file where the stdout and stderr will be redirected.
-    - at (str): The path to the directory where the script should be executed.
+def run_process_with_std(run_script: str, at: str) -> subprocess.Popen[bytes]:
+    process = subprocess.Popen(run_script, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=at, executable="/bin/bash")
+    return process
 
-    Returns:
-    None
-
-    Raises:
-    - subprocess.CalledProcessError: If the script execution returns a non-zero exit status.
-    """
-    with stdout_file_path.open("wb") as stdout_file:
-        subprocess.run(
-            run_script,
-            stdout=stdout_file,
-            stderr=subprocess.STDOUT,
-            cwd=at,
-            shell=True,
-            executable="/bin/bash",
-            check=True
-        )
+   
 
 async def setup(
         job_id: uuid.UUID,
@@ -205,6 +170,8 @@ async def setup(
         git.clone_repo(repo_name_with_namspace=dataset_name, to=dataset_path, branch=dataset_branch)
         git.clone_repo(repo_name_with_namspace=model_name, to=model_path, branch=model_branch)
         # run_install_requirements(model_path, job_id)
+        logger = logging.getLogger(__name__)
+        Runner._decrement_worker_count(logger=logger)
     except Exception as e:
         remove(job_id, dataset_name, model_name)
         raise Exception(f"Error Setting up Docker Environment: {str(e)}")
