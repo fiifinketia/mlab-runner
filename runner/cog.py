@@ -126,7 +126,7 @@ def run_process_with_std(run_script: str, at: str) -> subprocess.Popen[bytes]:
     process = subprocess.Popen(run_script, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=at, executable="/bin/bash")
     return process
 
-def fetch_results(at: str) -> tuple[str, Any]:
+def fetch_results(at: str) -> tuple[str, Any] | None:
     error = None
     success = None
     at = change2_local_dir(at)

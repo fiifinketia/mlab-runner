@@ -102,7 +102,9 @@ class Runner(runner_pb2_grpc.RunnerServicer):
             for line in process.stdout:
                 yield runner_pb2.RunTaskResponse(line=line)
             time.sleep(0.1)
+        Runner.logger().info("Task completed successfully")
         results = cg.fetch_results(request.model.path)
+        print(results)
         if results is None:
             Runner.logger().error("No results")
         elif results[0] == "success":
