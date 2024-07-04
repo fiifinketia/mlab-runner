@@ -47,6 +47,7 @@ class Settings(BaseSettings):
 
     results_dir: str = os.getenv("RESULTS_DIR", "/var/lib/docker/volumes/filez/results")
     server_base_dir: str = os.getenv("SERVER_BASE_DIR", "/var/lib/docker/volumes/filez/server")
+    runner_dir: str = os.getenv("RUNNER_BASE_DIR", "/var/lib/docker/volumes/filez/runner")
     # datasets_dir: str = git_user_path + "/datasets"
     # models_dir: str = git_user_path + "/models"
 

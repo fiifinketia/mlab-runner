@@ -1,8 +1,10 @@
 import asyncio
 from concurrent import futures
+from pathlib import Path
 import pickle
 import subprocess
 import sys
+from typing import Mapping
 import grpc
 import requests
 from mlab_pyprotos import runner_pb2_grpc, runner_pb2 
@@ -37,13 +39,15 @@ class Runner(runner_pb2_grpc.RunnerServicer):
 
     @staticmethod
     def save_worker_count(count) -> None:
-        with open('workers_count.pkl', 'wb') as f:
+        file_path = Path(f"{settings.runner_dir}/worker_count.pkl")
+        with open(file_path, 'wb') as f:
             pickle.dump(count, f)
     
     @staticmethod
     def load_worker_count() -> int:
+        file_path = Path(f"{settings.runner_dir}/worker_count.pkl")
         try:
-            with open('workers_count.pkl', 'rb') as f:
+            with open(file_path, 'rb') as f:
                 return pickle.load(f)
         except FileNotFoundError:
             return 0
@@ -101,10 +105,60 @@ class Runner(runner_pb2_grpc.RunnerServicer):
         results = cg.fetch_results(request.model.path)
         if results is None:
             Runner.logger().error("No results")
-        else:
+        elif results[0] == "success":
+            status, success = results[1]
             Runner.logger().info("Results fetched successfully")
-            print(results.get("task_id"))
-            # yield runner_pb2.RunTaskResponse(results=results)
+            files = []
+            for key, value in success.get("files"):
+                info = runner_pb2.FileInfo(
+                    name=key,
+                    extention=key.split(".")[-1]
+                )
+                bytes_content = runner_pb2.BytesContent(
+                    file_size=len(value),
+                    buffer=value,
+                    info=info,
+                )
+                files.append(bytes_content)
+            metrics = []
+            for key, value in success.get("metrics"):
+                metrics.append(runner_pb2.Metric(
+                    name=key,
+                    value=value,
+                ))
+            task_result = runner_pb2.TaskResult(
+                task_id=success.get('task_id'),
+                status=status,
+                files=success.get('files'),
+                metrics=metrics,
+                files=files,
+                pkg_name=success.get('pkg_name'),
+                pretrained_model=success.get('pretrained_model'),
+            )
+            return runner_pb2.RunTaskResponse(result=task_result)
+        else:
+            Runner.logger().error("Error in return")
+            files = []
+            for key, value in success.get("files"):
+                info = runner_pb2.FileInfo(
+                    name=key,
+                    extention=key.split(".")[-1]
+                )
+                bytes_content = runner_pb2.BytesContent(
+                    file_size=len(value),
+                    buffer=value,
+                    info=info,
+                )
+                files.append(bytes_content)
+            task_result = runner_pb2.TaskResult(
+                task_id=results.get('task_id'),
+                status=status,
+                files=files,
+                metrics=[],
+                pkg_name=results.get('pkg_name'),
+            )
+            return runner_pb2.RunTaskResponse(result=task_result)
+
         Runner.increment_worker_count()
         
     

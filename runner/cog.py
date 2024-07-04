@@ -126,7 +126,7 @@ def run_process_with_std(run_script: str, at: str) -> subprocess.Popen[bytes]:
     process = subprocess.Popen(run_script, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=at, executable="/bin/bash")
     return process
 
-def fetch_results(at: str) -> Any:
+def fetch_results(at: str) -> tuple[str, Any]:
     error = None
     success = None
     at = change2_local_dir(at)
@@ -134,13 +134,13 @@ def fetch_results(at: str) -> Any:
     try:
         with open(f"{at}/success/result.json", "r") as f:
             success = json.load(f)
-        return success
+        return ("success", success)
     except FileNotFoundError as e:
         logging.error("Error loading result: {}".format(e))
         try:
             with open(f"{at}/error/result.json", "r") as f:
                 error = json.load(f)
-            return error
+            return ("error", error)
         except FileNotFoundError as e:
             logging.error("Error loading result: {}".format(e))
             return None
