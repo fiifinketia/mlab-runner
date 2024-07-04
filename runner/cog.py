@@ -184,9 +184,6 @@ async def setup(
     try:
         git.clone_repo(repo_name_with_namspace=dataset_name, to=dataset_path, branch=dataset_branch)
         git.clone_repo(repo_name_with_namspace=model_name, to=model_path, branch=model_branch)
-        # run_install_requirements(model_path, job_id)
-        logger = logging.getLogger(__name__)
-        Runner.decrement_worker_count()
     except Exception as e:
         remove(job_id, dataset_name, model_name)
         raise Exception(f"Error Setting up Docker Environment: {str(e)}")
