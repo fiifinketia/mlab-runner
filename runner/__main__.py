@@ -106,7 +106,7 @@ class Runner(runner_pb2_grpc.RunnerServicer):
         if results is None:
             Runner.logger().error("No results")
         elif results[0] == "success":
-            status, success = results[1]
+            status, success = results
             Runner.logger().info("Results fetched successfully")
             files = []
             for key, value in success.get("files"):
@@ -129,7 +129,6 @@ class Runner(runner_pb2_grpc.RunnerServicer):
             task_result = runner_pb2.TaskResult(
                 task_id=success.get('task_id'),
                 status=status,
-                files=success.get('files'),
                 metrics=metrics,
                 files=files,
                 pkg_name=success.get('pkg_name'),
@@ -138,8 +137,9 @@ class Runner(runner_pb2_grpc.RunnerServicer):
             return runner_pb2.RunTaskResponse(result=task_result)
         else:
             Runner.logger().error("Error in return")
+            status, error = results
             files = []
-            for key, value in success.get("files"):
+            for key, value in error.get("files"):
                 info = runner_pb2.FileInfo(
                     name=key,
                     extention=key.split(".")[-1]
@@ -151,11 +151,11 @@ class Runner(runner_pb2_grpc.RunnerServicer):
                 )
                 files.append(bytes_content)
             task_result = runner_pb2.TaskResult(
-                task_id=results.get('task_id'),
+                task_id=error.get('task_id'),
                 status=status,
                 files=files,
                 metrics=[],
-                pkg_name=results.get('pkg_name'),
+                pkg_name=error.get('pkg_name'),
             )
             return runner_pb2.RunTaskResponse(result=task_result)
 
