@@ -70,6 +70,7 @@ def run(
         trained_model=trained_model,
         job_id=job_id
     )
+    at = replace_source_with_destination(at, base_dir)
     # stdout_file_path = Path(f"{base_dir}/{str(task_id)}/stdout.log").resolve()
     # process = executor.submit(
     #     run_process_with_std,
