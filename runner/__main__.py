@@ -116,9 +116,12 @@ class Runner(runner_pb2_grpc.RunnerServicer):
                     name=key,
                     extension=key.split(".")[-1]
                 )
+                bytz = base64.b64decode(value)
+                print(bytz)
+                print(isinstance(bytz, bytes))
                 bytes_content = runner_pb2.BytesContent(
                     file_size=len(value),
-                    buffer=base64.b64decode(value),
+                    buffer=bytz,
                     info=info,
                 )
                 files.append(bytes_content)
