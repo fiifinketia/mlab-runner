@@ -150,7 +150,7 @@ class Runner(runner_pb2_grpc.RunnerServicer):
     
 async def serve():
     logger = logging.getLogger(__name__)
-    server: grpc.aio.Server = grpc.aio.server(thread_pool=futures.ThreadPoolExecutor(max_workers=settings.workers_count), maximum_concurrent_rpcs=settings.workers_count)
+    server: grpc.aio.Server = grpc.aio.server(maximum_concurrent_rpcs=settings.workers_count)
     runner_pb2_grpc.add_RunnerServicer_to_server(Runner(), server)
     server.add_insecure_port('0.0.0.0:50051')
     await server.start()
