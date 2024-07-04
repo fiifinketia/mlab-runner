@@ -135,7 +135,8 @@ def fetch_results(at: str) -> Any:
         with open(f"{at}/success/results.json", "r") as f:
             success = json.load(f)
         return success
-    except FileNotFoundError:
+    except FileNotFoundError as e:
+        logging.error("Error loading results: {}".format(e))
         try:
             with open(f"{at}/error/results.json", "r") as f:
                 error = json.load(f)
