@@ -109,7 +109,7 @@ class Runner(runner_pb2_grpc.RunnerServicer):
         Runner.logger().debug(f"Current worker count: {workers_count} workers")
         return "available" if workers_count > 0 else "occupied"
     
-    def _stream_process(process):
+    def _stream_process(self, process):
         go = process.poll() is None
         return go
     
