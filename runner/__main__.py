@@ -97,7 +97,7 @@ class Runner(runner_pb2_grpc.RunnerServicer):
         process: subprocess.Popen[bytes] = cg.run(name=request.task_name, at=request.model.path, task_id=request.task_id, user_id=request.user_id, base_dir=request.base_dir, dataset_dir=request.dataset.path, job_id=request.job_id, trained_model=request.trained_model)
         while self._stream_process(process):
             for line in process.stdout:
-                yield runner_pb2.RunTaskResponse(line)
+                yield runner_pb2.RunTaskResponse(line=line)
             time.sleep(0.1)
         print(cg.fetch_results(request.model.path))
         Runner.increment_worker_count()
