@@ -85,6 +85,7 @@ class Runner(runner_pb2_grpc.RunnerServicer):
     async def create_task_environment(self, request, context):
         self.check_worker_count()
         await cg.setup(request.job_id, request.dataset.name, request.model.name, request.dataset.branch, request.model.branch)
+        Runner.increment_worker_count()
         return runner_pb2.CreateTaskResponse()
     
     def get_task_environment(self, request, context):
@@ -99,6 +100,7 @@ class Runner(runner_pb2_grpc.RunnerServicer):
                 yield runner_pb2.RunTaskResponse(line)
             time.sleep(0.1)
         print(cg.fetch_results(request.model.path))
+        Runner.increment_worker_count()
         
     
     def _get_server_status(self):
