@@ -113,7 +113,7 @@ class Runner(runner_pb2_grpc.RunnerServicer):
             for key, value in success.get("files").items():
                 info = runner_pb2.FileInfo(
                     name=key,
-                    extention=key.split(".")[-1]
+                    extension=key.split(".")[-1]
                 )
                 bytes_content = runner_pb2.BytesContent(
                     file_size=len(value),
