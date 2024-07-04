@@ -46,6 +46,7 @@ class Settings(BaseSettings):
     cog_base_dir = os.getenv("COG_BASE_DIR", "/var/lib/docker/volumes/filez")
 
     results_dir: str = os.getenv("RESULTS_DIR", "/var/lib/docker/volumes/filez/results")
+    server_base_dir: str = os.getenv("SERVER_BASE_DIR", "/var/lib/docker/volumes/filez/server")
     # datasets_dir: str = git_user_path + "/datasets"
     # models_dir: str = git_user_path + "/models"
 
