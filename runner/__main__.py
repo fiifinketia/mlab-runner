@@ -14,7 +14,7 @@ import time
 import multiprocessing
 import logging
 
-logging.basicConfig(level=logging.CRITICAL)
+# logging.basicConfig(level=logging.CRITICAL)
 class RunnerException(Exception):
 
     def __init__(self, message: str) -> None:
@@ -102,25 +102,22 @@ class Runner(runner_pb2_grpc.RunnerServicer):
         # print(res.json())
         # TODO: Function to calculate availability
         workers_count = self.load_worker_count()
-        Runner.logger.info(f"Current worker count: {workers_count} workers")
+        Runner.logger.debug(f"Current worker count: {workers_count} workers")
         return "available" if workers_count > 0 else "occupied"
     
     def _stream_process(process):
         go = process.poll() is None
         return go
     
-def serve():
+async def serve():
     logger = logging.getLogger(__name__)
     server: grpc.aio.Server = grpc.aio.server(maximum_concurrent_rpcs=settings.workers_count)
     runner_pb2_grpc.add_RunnerServicer_to_server(Runner(), server)
     server.add_insecure_port('0.0.0.0:50051')
-    server.start()
-    try:
-        logger.info('Runner server started on port 50051')
-        time.sleep(86400)
-    except InterruptedError:
-        pass
-    server.wait_for_termination()
+    await server.start()
+    logger.info('Runner server started on port 50051')
+    await server.wait_for_termination()
 
 if __name__ == '__main__':
-    serve()
+    logging.basicConfig(level=logging.CRITICAL)
+    asyncio.run(serve())
