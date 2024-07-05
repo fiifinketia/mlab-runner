@@ -127,7 +127,7 @@ class Runner(runner_pb2_grpc.RunnerServicer):
                 files.append(bytes_content)
             metrics = []
             for key, value in success.get("metrics").items():
-                metrics.append(runner_pb2.Metric(
+                metrics.append(runner_pb2.Metrics(
                     name=key,
                     value=value,
                 ))
