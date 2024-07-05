@@ -125,9 +125,10 @@ class Runner(runner_pb2_grpc.RunnerServicer):
                 files.append(bytes_content)
             metrics = []
             for key, value in success.get("metrics").items():
+                print(key, value)
                 metrics.append(runner_pb2.Metrics(
                     name=key,
-                    value=value,
+                    value=str(value),
                 ))
             task_result = runner_pb2.TaskResult(
                 task_id=success.get('task_id'),
