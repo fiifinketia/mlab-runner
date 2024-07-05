@@ -97,6 +97,7 @@ class Runner(runner_pb2_grpc.RunnerServicer):
     
     async def run_task(self, request, context):
         self.check_worker_count()
+        Runner.decrement_worker_count()
         await cg.prepare(job_id=request.job_id, dataset_name=request.dataset.name, model_name=request.model.name, dataset_type=request.dataset.type, dataset_branch=request.dataset.branch, model_branch=request.model.branch, results_dir=request.results_dir)
         process: subprocess.Popen[bytes] = cg.run(name=request.task_name, at=request.model.path, task_id=request.task_id, user_id=request.user_id, base_dir=request.base_dir, dataset_dir=request.dataset.path, job_id=request.job_id, trained_model=request.trained_model)
         while self._stream_process(process):
@@ -125,7 +126,6 @@ class Runner(runner_pb2_grpc.RunnerServicer):
                 files.append(bytes_content)
             metrics = []
             for key, value in success.get("metrics").items():
-                print(key, value)
                 metric = runner_pb2.Metrics(
                     name=key,
                     metric=str(value),
@@ -139,7 +139,6 @@ class Runner(runner_pb2_grpc.RunnerServicer):
                 pkg_name=success.get('pkg_name'),
                 pretrained_model=success.get('pretrained_model'),
             )
-            print(metrics)
             yield runner_pb2.RunTaskResponse(result=task_result)
         else:
             Runner.logger().error("Error in return")
@@ -150,9 +149,11 @@ class Runner(runner_pb2_grpc.RunnerServicer):
                     name=key,
                     extention=key.split(".")[-1]
                 )
+                bytz = base64.b64decode(value)
+
                 bytes_content = runner_pb2.BytesContent(
                     file_size=len(value),
-                    buffer=value,
+                    buffer=bytz,
                     info=info,
                 )
                 files.append(bytes_content)
@@ -160,7 +161,6 @@ class Runner(runner_pb2_grpc.RunnerServicer):
                 task_id=error.get('task_id'),
                 status=status,
                 files=files,
-                metrics=[],
                 pkg_name=error.get('pkg_name'),
             )
             yield runner_pb2.RunTaskResponse(result=task_result)
