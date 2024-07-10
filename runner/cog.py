@@ -184,7 +184,7 @@ async def setup(
         git.clone_repo(repo_name_with_namspace=dataset_name, to=dataset_path, branch=dataset_branch)
         git.clone_repo(repo_name_with_namspace=model_name, to=model_path, branch=model_branch)
     except Exception as e:
-        remove(job_id, dataset_name, model_name)
+        remove(job_id)
         raise Exception(f"Error Setting up Docker Environment: {str(e)}")
 
     return True
@@ -270,49 +270,11 @@ def stop(job_id: uuid.UUID) -> bool:
         os.system(f"docker rm {result}")
     return True
 
-def remove(job_id: uuid.UUID, dataset_name: str, model_name: str) -> bool:
-    """
-    Remove the environment for the job.
-
-    This function removes the dataset and model directories associated with the given job_id.
-    It uses the os.system() function to execute the 'rm -rf' command to delete the directories.
-
-    Parameters:
-    - job_id (uuid.UUID): The unique identifier for the job.
-    - dataset_name (str): The name of the dataset repository.
-    - model_name (str): The name of the model repository.
-
-    Returns:
-    - bool: True if the directories are successfully removed, False otherwise.
-
-    Note:
-    - This function uses the os.system() function to execute the 'rm -rf' command, which can be a security risk.
-    - It is recommended to use a safer alternative, such as shutil.rmtree(), for removing directories in production code.
-    """
-    _, dataset_path, model_path = job_get_dirs(job_id, dataset_name, model_name)
-    os.system(f"rm -rf {dataset_path}")  # noqa: F821
-    os.system(f"rm -rf {model_path}")
-    return True
-
-def remove_docker(job_id: uuid.UUID) -> None:
-    """
-    Remove docker image which serves as env from machine.
-
-    This function uses the os.system() function to execute the 'docker rmi' command,
-    which removes a Docker image from the local machine. The image to be removed is
-    identified by its unique job_id.
-
-    Parameters:
-    - job_id (uuid.UUID): The unique identifier for the job. This is used to identify the Docker image to be removed.
-
-    Returns:
-    - None: This function does not return any value.
-
-    Note:
-    - This function uses the os.system() function to execute the 'docker rmi' command, which can be a security risk.
-    - It is recommended to use a safer alternative, such as Docker SDK for Python, for interacting with Docker in production code.
-    """
+def remove(job_id: uuid.UUID) -> bool:
+    job_path, _, _ = job_get_dirs(job_id, dataset_name="", model_name="")
     os.system(f"docker rmi {str(job_id)}")
+    os.system(f"rm -rf {job_path}")  # noqa: F821
+    return True
 
 def replace_source_with_destination(at: str, base_dir: str) -> str:
     """
