@@ -68,7 +68,7 @@ def run(
         trained_model=trained_model,
         job_id=job_id
     )
-    at = job_get_dirs(job_id, "", model_name)
+    _,_,at = job_get_dirs(job_id, "", model_name)
     print(run_script)
     # stdout_file_path = Path(f"{base_dir}/{str(task_id)}/stdout.log").resolve()
     # process = executor.submit(
