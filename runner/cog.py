@@ -122,10 +122,10 @@ def run_process_with_std(run_script: str, at: str) -> subprocess.Popen[bytes]:
     process = subprocess.Popen(run_script, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=at, executable="/bin/bash")
     return process
 
-def fetch_results(task_id: str, model_name: str) -> tuple[str, Any] | None:
+def fetch_results(job_id, model_name: str) -> tuple[str, Any] | None:
     error = None
     success = None
-    _, _, at = job_get_dirs(job_id=task_id, model_name=model_name, dataset_name="")
+    _, _, at = job_get_dirs(job_id=job_id, model_name=model_name, dataset_name="")
     print(at)
     try:
         with open(f"{at}/success/result.json", "r") as f:
