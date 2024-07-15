@@ -104,7 +104,7 @@ class Runner(runner_pb2_grpc.RunnerServicer):
                 yield runner_pb2.RunTaskResponse(line=line)
             time.sleep(0.1)
         Runner.logger().info("Task completed successfully")
-        results = cg.fetch_results(request.model.path)
+        results = cg.fetch_results(request.task_id, request.model.name)
         if results is None:
             Runner.logger().error("No results")
         elif results[0] == "success":
