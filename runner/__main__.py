@@ -37,13 +37,13 @@ class Runner(runner_pb2_grpc.RunnerServicer):
 
     @staticmethod
     def save_worker_count(count) -> None:
-        file_path = Path(f"{self.runner_dir}/worker_count.pkl")
+        file_path = Path(f"{settings.runner_dir}/worker_count.pkl")
         with open(file_path, 'wb') as f:
             pickle.dump(count, f)
     
     @staticmethod
     def load_worker_count() -> int:
-        file_path = Path(f"{self.runner_dir}/worker_count.pkl")
+        file_path = Path(f"{settings.runner_dir}/worker_count.pkl")
         try:
             with open(file_path, 'rb') as f:
                 return pickle.load(f)
