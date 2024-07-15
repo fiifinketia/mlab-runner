@@ -1,14 +1,12 @@
 """This module contains the functions to run the cog commands"""
-from concurrent.futures import ProcessPoolExecutor
+# from concurrent.futures import ProcessPoolExecutor
 import json
 import logging
 import subprocess
 import os, shutil
-from typing import Any, Dict
+from typing import Any
 import uuid
-from pathlib import Path
 
-from runner.__main__ import Runner
 from runner.git import GitService
 from runner.settings import settings
 
@@ -50,7 +48,7 @@ def copyfile(
 
 def run(
     name: str,
-    at: str,
+    model_name: str,
     dataset_dir: str,
     base_dir: str,
     task_id: str,
@@ -70,7 +68,7 @@ def run(
         trained_model=trained_model,
         job_id=job_id
     )
-    at = change2_local_dir(at)
+    at = job_get_dirs(job_id, "", model_name)
     print(run_script)
     # stdout_file_path = Path(f"{base_dir}/{str(task_id)}/stdout.log").resolve()
     # process = executor.submit(
