@@ -98,7 +98,7 @@ class Runner(runner_pb2_grpc.RunnerServicer):
         self.check_worker_count()
         Runner.decrement_worker_count()
         await cg.prepare(job_id=request.job_id, dataset_name=request.dataset.name, model_name=request.model.name, dataset_type=request.dataset.type, dataset_branch=request.dataset.branch, model_branch=request.model.branch, results_dir=request.results_dir)
-        process: subprocess.Popen[bytes] = cg.run(name=request.task_name, model_name=request.model.name, task_id=request.task_id, user_id=request.user_id, job_id=request.job_id, trained_model=request.trained_model)
+        process: subprocess.Popen[bytes] = cg.run(name=request.task_name, model_name=request.model.name, dataset_name=request.dataset.name, task_id=request.task_id, user_id=request.user_id, job_id=request.job_id, trained_model=request.trained_model)
         while self._stream_process(process):
             for line in process.stdout:
                 yield runner_pb2.RunTaskResponse(line=line)
@@ -146,7 +146,7 @@ class Runner(runner_pb2_grpc.RunnerServicer):
             for key, value in error.get("files").items():
                 info = runner_pb2.FileInfo(
                     name=key,
-                    extention=key.split(".")[-1]
+                    extension=key.split(".")[-1]
                 )
                 bytz = base64.b64decode(value)
 

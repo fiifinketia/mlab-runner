@@ -49,6 +49,7 @@ def copyfile(
 def run(
     name: str,
     model_name: str,
+    dataset_name: str,
     task_id: str,
     user_id: str,
     job_id: uuid.UUID,
@@ -57,7 +58,7 @@ def run(
     # logger = logging.getLogger(__name__)
     # executor = ProcessPoolExecutor()
 
-    base_dir,dataset_dir,at = job_get_dirs(job_id, "", model_name)
+    base_dir,dataset_dir,at = job_get_dirs(job_id, dataset_name, model_name)
     run_script = build_cli_script(
         name=name,
         dataset_dir=dataset_dir,
@@ -111,11 +112,11 @@ def build_cli_script(
     dataset_dir = replace_source_with_destination(dataset_dir, base_dir)
     run_script = f"cog train -n {str(job_id)} -i dataset={dataset_dir} -i task_id={task_id} -i pkg_name={name} -i user_id={user_id}"
     if trained_model is not None:
+        print(trained_model)
         trained_model = replace_source_with_destination(trained_model, base_dir)
         run_script += f" -i trained_model={trained_model}"
     # Mount the base directory
-    local_dir = change2_local_dir(base_dir)
-    run_script += f" --mount type=bind,source={local_dir},target={settings.cog_base_dir}"
+    run_script += f" --mount type=bind,source={base_dir},target={settings.cog_base_dir}"
     return run_script
 
 def run_process_with_std(run_script: str, at: str) -> subprocess.Popen[bytes]:
