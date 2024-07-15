@@ -49,8 +49,6 @@ def copyfile(
 def run(
     name: str,
     model_name: str,
-    dataset_dir: str,
-    base_dir: str,
     task_id: str,
     user_id: str,
     job_id: uuid.UUID,
@@ -59,6 +57,7 @@ def run(
     # logger = logging.getLogger(__name__)
     # executor = ProcessPoolExecutor()
 
+    base_dir,dataset_dir,at = job_get_dirs(job_id, "", model_name)
     run_script = build_cli_script(
         name=name,
         dataset_dir=dataset_dir,
@@ -68,7 +67,6 @@ def run(
         trained_model=trained_model,
         job_id=job_id
     )
-    _,_,at = job_get_dirs(job_id, "", model_name)
     print(run_script)
     # stdout_file_path = Path(f"{base_dir}/{str(task_id)}/stdout.log").resolve()
     # process = executor.submit(
