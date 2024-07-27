@@ -183,7 +183,8 @@ class Runner(runner_pb2_grpc.RunnerServicer):
 logging.basicConfig(level=logging.DEBUG)
 async def serve():
     logger = logging.getLogger(__name__)
-    server: grpc.aio.Server = grpc.aio.server(maximum_concurrent_rpcs=settings.workers_count)
+    server_opt = [('grpc.max_send_message_length', 512 * 1024 * 1024), ('grpc.max_receive_message_length', 512 * 1024 * 1024)]
+    server: grpc.aio.Server = grpc.aio.server(maximum_concurrent_rpcs=settings.workers_count, options=server_opt)
     runner_pb2_grpc.add_RunnerServicer_to_server(Runner(runner_dir=settings.runner_dir), server)
     server.add_insecure_port('0.0.0.0:50051')
     logger.info('Runner server started on port 50051')
