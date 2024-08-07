@@ -61,7 +61,7 @@ class Settings(BaseSettings):
 
         :return: RPC URL.
         """
-        return f"{self.host}:{self.rpc_url}"
+        return f"{self.host}:{self.rpc_port}"
 
 
     class Config:
