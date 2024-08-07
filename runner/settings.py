@@ -61,7 +61,7 @@ class Settings(BaseSettings):
 
         :return: RPC URL.
         """
-        return URL.build(scheme="grpc", host=self.host, port=self.rpc_port)
+        return f"{self.host}:{self.rpc_url}"
 
 
     class Config:
