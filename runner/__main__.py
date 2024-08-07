@@ -186,8 +186,8 @@ async def serve():
     server_opt = [('grpc.max_send_message_length', 512 * 1024 * 1024), ('grpc.max_receive_message_length', 512 * 1024 * 1024)]
     server: grpc.aio.Server = grpc.aio.server(maximum_concurrent_rpcs=settings.workers_count, options=server_opt)
     runner_pb2_grpc.add_RunnerServicer_to_server(Runner(runner_dir=settings.runner_dir), server)
-    server.add_insecure_port('0.0.0.0:50051')
-    logger.info('Runner server started on port 50051')
+    server.add_insecure_port(settings.rpc_url)
+    logger.info(f"Runner server started on {settings.rpc_url}")
     try:
         await server.start()
         await server.wait_for_termination()

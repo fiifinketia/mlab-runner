@@ -32,7 +32,8 @@ class Settings(BaseSettings):
     """
 
     host: str = os.getenv("HOST", "localhost")
-    port: int = int(os.getenv("PORT", "8000"))
+    rpc_port: int = int(os.getenv("RPC_PORT", "50051"))
+    monitor_port: int = int(os.getenv("MONITOR_PORT", "50051"))
     # quantity of workers for uvicorn, get from env
     workers_count: int = int(os.getenv("WORKERS_COUNT", "1"))
     # Enable uvicorn reloading
@@ -52,6 +53,15 @@ class Settings(BaseSettings):
     # models_dir: str = git_user_path + "/models"
 
     # sudo_password: str = os.getenv("SUDO_PASSWORD", "")
+
+    @property
+    def rpc_url(self):
+        """
+        Construct the RPC URL.
+
+        :return: RPC URL.
+        """
+        return URL.build(scheme="grpc", host=self.host, port=self.rpc_port)
 
 
     class Config:
