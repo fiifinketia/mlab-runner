@@ -4,6 +4,7 @@ from pathlib import Path
 import pickle
 import subprocess
 import time
+from glances.stats import GlancesStats
 
 import runner.cog as cg
 from mlab_pyprotos import runner_pb2, runner_pb2_grpc
@@ -167,6 +168,8 @@ class Runner(runner_pb2_grpc.RunnerServicer):
         # res = requests.get(self._server_monitor_url)
         # print(res.json())
         # TODO: Function to calculate availability
+        stats = GlancesStats()
+        print(stats)
         workers_count = self.load_worker_count()
         Runner.logger().debug(f"Current worker count: {workers_count} workers")
         return "available" if workers_count > 0 else "occupied"
