@@ -49,6 +49,11 @@ class Settings(BaseSettings):
     results_dir: str = os.getenv("RESULTS_DIR", "/var/lib/docker/volumes/filez/results")
     server_base_dir: str = os.getenv("SERVER_BASE_DIR", "/var/lib/docker/volumes/filez/server")
     runner_dir: str = os.getenv("RUNNER_BASE_DIR", "/var/lib/docker/volumes/filez/runner")
+
+    mapi_host = os.getenv("MAPI_HOST", "localhost")
+    mapi_port = os.getenv("MAPI_PORT", "8080")
+    mapi_protocol = os.getenv("MAPI_PROTOCOL", "http")
+    mapi_api_key: str = os.getenv("MAPI_API_KEY", "")
     # datasets_dir: str = git_user_path + "/datasets"
     # models_dir: str = git_user_path + "/models"
 
@@ -62,6 +67,15 @@ class Settings(BaseSettings):
         :return: RPC URL.
         """
         return f"{self.host}:{self.rpc_port}"
+    
+    @property
+    def mapi_url(self):
+        """
+        Construct url
+
+        :return: MAPI URL.
+        """
+        return f"{self.mapi_protocol}://{self.mapi_host}:{self.mapi_port}"
 
 
     class Config:

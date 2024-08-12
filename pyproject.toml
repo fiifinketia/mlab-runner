@@ -13,6 +13,7 @@ grpcio-tools = "^1.64.1"
 pydantic = { version = "^1", extras=["dotenv"] }
 yarl = "^1.9.4"
 mlab-pyprotos = {git = "https://github.com/Data-Intel-and-Swarm-Analytics-Lab/mlab-pyprotos.git", rev = "master"}
+schedule = "^1.2.2"
 
 [tool.poetry.group.all.dependencies]
 glances = "^4.1.2"

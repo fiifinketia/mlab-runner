@@ -7,6 +7,13 @@ from pathlib import Path
 import pickle
 import subprocess
 import time
+from glances.main import GlancesMain
+from glances.stats import GlancesStats
+import schedule
+import requests
+from enum import Enum
+from pydantic import BaseModel
+from typing import Any
 
 import runner.cog as cg
 from mlab_pyprotos import runner_pb2, runner_pb2_grpc
@@ -22,7 +29,6 @@ class RunnerException(Exception):
 
 
 class Runner(runner_pb2_grpc.RunnerServicer):
-    _server_monitor_url = 'http://197.255.122.208:61208/api/4/all'
 
     def __init__(self, workers_count: int=5, runner_dir: str = "") -> None:
         super().__init__()
@@ -87,6 +93,7 @@ class Runner(runner_pb2_grpc.RunnerServicer):
     
     async def create_task_environment(self, request, context):
         self.check_worker_count()
+        
         await cg.setup(request.job_id, request.dataset.name, request.model.name, request.dataset.branch, request.model.branch)
         Runner.increment_worker_count()
         return runner_pb2.CreateTaskResponse()
@@ -164,12 +171,9 @@ class Runner(runner_pb2_grpc.RunnerServicer):
             )
             yield runner_pb2.RunTaskResponse(result=task_result)
 
-        Runner.increment_worker_count()
-        
+        Runner.increment_worker_count()       
     
     def _get_server_status(self):
-        # res = requests.get(self._server_monitor_url)
-        # print(res.json())
         # TODO: Function to calculate availability
         workers_count = self.load_worker_count()
         Runner.logger().debug(f"Current worker count: {workers_count} workers")
@@ -178,23 +182,76 @@ class Runner(runner_pb2_grpc.RunnerServicer):
     def _stream_process(self, process):
         go = process.poll() is None
         return go
-    
 
-logging.basicConfig(level=logging.DEBUG)
+
+class Action(str, Enum):
+    """Action model."""
+    CREATE_DATASET = "create:dataset"
+    CREATE_MODEL = "create:model"
+    CREATE_JOB = "create:job"
+    STOP_JOB = "stop:job"
+    CLOSE_JOB = "close:job"
+    RUN_JOB = "run:job"
+    UPLOAD_TEST_JOB = "upload:test:job"
+    RUNNER_BILL = "runner:bill"
+
+class BalanceBillDTO(BaseModel):
+    """DTO for balance bill."""
+    action: Action
+    data: Any
+
+class CheckBillDTO(BaseModel):
+    """Check bill model."""
+    action: Action
+    data: Any
+
+class BillingCronService:
+    def __init__(self):
+        self.mlab_api = f"{settings.mapi_url}/billings/check"
+        glances = GlancesMain()
+        self._server_stats = GlancesStats(config=glances.get_config(), args=glances.get_args())
+        print("Billings service initializing...")
+        schedule.every(0.5).minutes.do(self._submit_billing)
+    
+    def start(self):
+        while 1:
+            schedule.run_pending()
+            time.sleep(0.1)
+
+    def stop(self):
+        schedule.clear()
+    def _get_server_stats(self):
+        self._server_stats.update()
+        return self._server_stats.getAllViewsAsDict()
+
+    def _submit_billing(self):
+        body = CheckBillDTO(
+            action=Action.RUNNER_BILL,
+            data=self._get_server_stats()
+        )
+        try:
+            res = requests.post(self.mlab_api, data=body.json(), timeout=20, headers={"x-api-key": settings.mapi_api_key})
+            res.raise_for_status()
+            print("Billing update sent to server")
+        except Exception as e:
+            print(f"Error sending billing update to server: {e}")
+
 async def serve():
-    logger = logging.getLogger(__name__)
     server_opt = [('grpc.max_send_message_length', 512 * 1024 * 1024), ('grpc.max_receive_message_length', 512 * 1024 * 1024)]
     server: grpc.aio.Server = grpc.aio.server(maximum_concurrent_rpcs=settings.workers_count, options=server_opt)
     runner_pb2_grpc.add_RunnerServicer_to_server(Runner(runner_dir=settings.runner_dir), server)
     server.add_insecure_port(settings.rpc_url)
-    logger.info(f"Runner server started on {settings.rpc_url}")
+    print(f"Runner server started on {settings.rpc_url}")
     try:
         await server.start()
+        billing_cron = BillingCronService()
+        billing_cron.start()
         await server.wait_for_termination()
     except InterruptedError:
         pass
     finally:
+        billing_cron.stop()
         await server.stop(0)
 
 if __name__ == '__main__':
-    asyncio.run(serve())
+    asyncio.run(serve())    
