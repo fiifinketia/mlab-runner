@@ -230,7 +230,7 @@ class BillingCronService:
             data=self._get_server_stats()
         )
         try:
-            res = requests.post(self.mlab_api, data=body.json(), timeout=20, headers={"x-api-key": settings.mapi_api_key})
+            res = requests.post(self.mlab_api, data=body.json(), timeout=20, headers={"x-api-key": settings.mapi_api_key}, verify=False)
             res.raise_for_status()
             print("Billing update sent to server")
         except Exception as e:
