@@ -207,7 +207,7 @@ class CheckBillDTO(BaseModel):
 
 class BillingCronService:
     def __init__(self):
-        self.mlab_api = f"{settings.mapi_url}/billings/check"
+        self.mlab_api = f"{settings.mapi_url}/api/billings/check"
         glances = GlancesMain()
         self._server_stats = GlancesStats(config=glances.get_config(), args=glances.get_args())
         print("Billings service initializing...")
