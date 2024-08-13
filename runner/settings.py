@@ -56,6 +56,8 @@ class Settings(BaseSettings):
     mapi_port = os.getenv("MAPI_PORT", "8080")
     mapi_protocol = os.getenv("MAPI_PROTOCOL", "http")
     mapi_api_key: str = os.getenv("MAPI_API_KEY", "")
+
+    use_pinggy_server: bool = bool(os.getenv("USE_PINGGY", "false"))
     # datasets_dir: str = git_user_path + "/datasets"
     # models_dir: str = git_user_path + "/models"
 

@@ -181,7 +181,7 @@ class Runner(runner_pb2_grpc.RunnerServicer):
 
 
 
-async def serve(use_pinggy=True):
+async def serve():
     server_opt = [('grpc.max_send_message_length', 512 * 1024 * 1024), ('grpc.max_receive_message_length', 512 * 1024 * 1024)]
     server: grpc.aio.Server = grpc.aio.server(maximum_concurrent_rpcs=settings.workers_count, options=server_opt)
     runner_pb2_grpc.add_RunnerServicer_to_server(Runner(runner_dir=settings.runner_dir), server)
@@ -190,7 +190,7 @@ async def serve(use_pinggy=True):
     try:
         await server.start()
         billing_cron = BillingCronService()
-        if use_pinggy:
+        if settings.use_pinggy_server:
             pinggy_service = PinggyHelperSever()
             pinggy_service.start_server()
             billing_cron.start()
@@ -202,10 +202,4 @@ async def serve(use_pinggy=True):
         await server.stop(0)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Runner")
-    parser.add_argument("-p", "--plugin", default=None)
-    args = parser.parse_args()
-    if args.plugin is not None and args.plugin == "pinggy":
-        asyncio.run(serve(use_pinggy=True))
-    else:
-        asyncio.run(serve())
+    asyncio.run(serve())
