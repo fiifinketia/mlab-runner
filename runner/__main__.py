@@ -1,3 +1,4 @@
+import argparse
 import asyncio
 import grpc
 
@@ -7,16 +8,11 @@ from pathlib import Path
 import pickle
 import subprocess
 import time
-from glances.main import GlancesMain
-from glances.stats import GlancesStats
-import schedule
-import requests
-from enum import Enum
-from pydantic import BaseModel
-from typing import Any
+from mlab_pyprotos import runner_pb2, runner_pb2_grpc
 
 import runner.cog as cg
-from mlab_pyprotos import runner_pb2, runner_pb2_grpc
+from runner.billing import BillingCronService
+from runner.pinggy_helper import PinggyHelperSever
 from runner.settings import settings
 
 class RunnerException(Exception):
@@ -184,59 +180,8 @@ class Runner(runner_pb2_grpc.RunnerServicer):
         return go
 
 
-class Action(str, Enum):
-    """Action model."""
-    CREATE_DATASET = "create:dataset"
-    CREATE_MODEL = "create:model"
-    CREATE_JOB = "create:job"
-    STOP_JOB = "stop:job"
-    CLOSE_JOB = "close:job"
-    RUN_JOB = "run:job"
-    UPLOAD_TEST_JOB = "upload:test:job"
-    RUNNER_BILL = "runner:bill"
 
-class BalanceBillDTO(BaseModel):
-    """DTO for balance bill."""
-    action: Action
-    data: Any
-
-class CheckBillDTO(BaseModel):
-    """Check bill model."""
-    action: Action
-    data: Any
-
-class BillingCronService:
-    def __init__(self):
-        self.mlab_api = f"{settings.mapi_url}/api/billings/check"
-        glances = GlancesMain()
-        self._server_stats = GlancesStats(config=glances.get_config(), args=glances.get_args())
-        print("Billings service initializing...")
-        schedule.every(0.5).minutes.do(self._submit_billing)
-    
-    def start(self):
-        while 1:
-            schedule.run_pending()
-            time.sleep(0.1)
-
-    def stop(self):
-        schedule.clear()
-    def _get_server_stats(self):
-        self._server_stats.update()
-        return self._server_stats.getAllViewsAsDict()
-
-    def _submit_billing(self):
-        body = CheckBillDTO(
-            action=Action.RUNNER_BILL,
-            data=self._get_server_stats()
-        )
-        try:
-            res = requests.post(self.mlab_api, data=body.json(), timeout=20, headers={"x-api-key": settings.mapi_api_key}, verify=False)
-            res.raise_for_status()
-            print("Billing update sent to server")
-        except Exception as e:
-            print(f"Error sending billing update to server: {e}")
-
-async def serve():
+async def serve(use_pinggy=True):
     server_opt = [('grpc.max_send_message_length', 512 * 1024 * 1024), ('grpc.max_receive_message_length', 512 * 1024 * 1024)]
     server: grpc.aio.Server = grpc.aio.server(maximum_concurrent_rpcs=settings.workers_count, options=server_opt)
     runner_pb2_grpc.add_RunnerServicer_to_server(Runner(runner_dir=settings.runner_dir), server)
@@ -245,7 +190,10 @@ async def serve():
     try:
         await server.start()
         billing_cron = BillingCronService()
-        billing_cron.start()
+        if use_pinggy:
+            pinggy_service = PinggyHelperSever()
+            pinggy_service.start_server()
+            billing_cron.start()
         await server.wait_for_termination()
     except InterruptedError:
         pass
@@ -254,4 +202,10 @@ async def serve():
         await server.stop(0)
 
 if __name__ == '__main__':
-    asyncio.run(serve())    
+    parser = argparse.ArgumentParser(description="Runner")
+    parser.add_argument("-p", "--plugin", default=None)
+    args = parser.parse_args()
+    if args.plugin is not None and args.plugin == "pinggy":
+        asyncio.run(serve(use_pinggy=True))
+    else:
+        asyncio.run(serve())

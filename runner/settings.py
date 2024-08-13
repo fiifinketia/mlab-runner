@@ -33,7 +33,7 @@ class Settings(BaseSettings):
 
     host: str = os.getenv("HOST", "localhost")
     rpc_port: int = int(os.getenv("RPC_PORT", "50051"))
-    monitor_port: int = int(os.getenv("MONITOR_PORT", "50051"))
+    pinggy_port: int = int(os.getenv("PINGGY_PORT", "50051"))
     # quantity of workers for uvicorn, get from env
     workers_count: int = int(os.getenv("WORKERS_COUNT", "1"))
     # Enable uvicorn reloading
@@ -49,6 +49,8 @@ class Settings(BaseSettings):
     results_dir: str = os.getenv("RESULTS_DIR", "/var/lib/docker/volumes/filez/results")
     server_base_dir: str = os.getenv("SERVER_BASE_DIR", "/var/lib/docker/volumes/filez/server")
     runner_dir: str = os.getenv("RUNNER_BASE_DIR", "/var/lib/docker/volumes/filez/runner")
+
+    pm2_logs_dir: str = os.getenv("PM2_LOGS_DIR", "/var/log/pm2_logs")
 
     mapi_host = os.getenv("MAPI_HOST", "localhost")
     mapi_port = os.getenv("MAPI_PORT", "8080")
