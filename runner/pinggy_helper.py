@@ -27,7 +27,7 @@ class PinggyHelper(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-type', 'text/plain')
         self.end_headers()
-        self.wfile.write(bytes(self._get_latest_pinggy_urls()))
+        self.wfile.write(bytes(self._get_latest_pinggy_urls(), encoding="utf-8"))
     
 class PinggyHelperSever:
 
