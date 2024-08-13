@@ -20,7 +20,11 @@ class PinggyHelper(BaseHTTPRequestHandler):
         for line in reversed(lines):
             if line.startswith('URLs:'):
                 urls = line[line.find('[') + 1: line.find(']')]
-                return urls.split(', ')[0]
+                # remove tcp:// protocol from the URL
+                url = urls.split(', ')[0]
+                if 'tcp://' in url:
+                    url = url[url.find('tcp://') + len('tcp://'):]
+                return url
         return None
     
     def do_GET(self):
