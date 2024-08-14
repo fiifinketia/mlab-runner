@@ -191,16 +191,17 @@ async def serve():
         await server.start()
         loop = asyncio.new_event_loop()
         billing_cron = BillingCronService()
-        loop.run_until_complete(billing_cron.start())
+        loop.run_forever(billing_cron.start())
         if settings.use_pinggy_server:
             pinggy_service = PinggyHelperSever()
-            loop.run_until_complete(pinggy_service.start_server())
+            loop.run_forever(pinggy_service.start_server())
         await server.wait_for_termination()
     except InterruptedError:
         pass
     finally:
         billing_cron.stop()
         await server.stop(0)
+        loop.stop()
 
 if __name__ == '__main__':
     asyncio.run(serve())
