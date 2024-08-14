@@ -193,6 +193,7 @@ async def serve():
         # thread = Thread()
         billing_cron = BillingCronService()
         asyncio.to_thread(billing_cron.start())
+        print("after")
         if settings.use_pinggy_server:
             pinggy_service = PinggyHelperSever()
             asyncio.to_thread(pinggy_service.start_server())
@@ -202,7 +203,6 @@ async def serve():
     finally:
         billing_cron.stop()
         await server.stop(0)
-        loop.stop()
 
 if __name__ == '__main__':
     asyncio.run(serve())
