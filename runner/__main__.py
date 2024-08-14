@@ -189,12 +189,13 @@ async def serve():
     print(f"Runner server started on {settings.rpc_url}")
     try:
         await server.start()
-        loop = asyncio.new_event_loop()
+        # from threading import Thread
+        # thread = Thread()
         billing_cron = BillingCronService()
-        loop.run_forever(billing_cron.start())
+        asyncio.to_thread(billing_cron.start())
         if settings.use_pinggy_server:
             pinggy_service = PinggyHelperSever()
-            loop.run_forever(pinggy_service.start_server())
+            asyncio.to_thread(pinggy_service.start_server())
         await server.wait_for_termination()
     except InterruptedError:
         pass
