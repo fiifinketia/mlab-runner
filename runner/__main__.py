@@ -192,11 +192,11 @@ async def serve():
         # from threading import Thread
         # thread = Thread()
         billing_cron = BillingCronService()
-        asyncio.to_thread(billing_cron.start())
+        asyncio.to_thread(billing_cron.start)
         print("after")
         if settings.use_pinggy_server:
             pinggy_service = PinggyHelperSever()
-            asyncio.to_thread(pinggy_service.start_server())
+            asyncio.to_thread(pinggy_service.start_server)
         await server.wait_for_termination()
     except InterruptedError:
         pass
